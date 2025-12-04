@@ -1,32 +1,46 @@
-﻿# Aerchain_Assignment
+# AI-Powered RFP Management System
 
-📌 1. Project Setup
-1.a Prerequisites
+A complete full-stack system to generate RFPs from natural language, manage vendors, send RFP emails, receive vendor replies via webhook, automatically parse responses using AI, and compare proposals.
+
+---
+
+# 📌 1. Project Setup
+
+## **1.a Prerequisites**
 
 Ensure the following are installed:
 
-Requirement	Version
-Node.js	v18+
-npm	v9+
-PostgreSQL	v14+
-SendGrid Account	For sending/receiving email
-OpenAI API Key	For AI parsing & scoring
+| Requirement | Version |
+|------------|----------|
+| Node.js | v18+ |
+| npm | v9+ |
+| PostgreSQL | v14+ |
+| SendGrid Account | Required |
+| OpenAI API Key | Required |
 
-Clone the repo:
+Clone the repository:
 
+```bash
 git clone https://github.com/<your-username>/Aerchain_Assignment.git
 cd Aerchain_Assignment
+```
 
-1.b Environment Variables (.env Example)
+---
 
-Create:
+## **1.b Environment Variables**
 
+Create the following files:
+
+```
 backend/.env
-
 frontend/.env
-
 backend/.env.example
+frontend/.env.example
+```
 
+### **backend/.env.example**
+
+```env
 PORT=4000
 
 # Database
@@ -41,146 +55,166 @@ EMAIL_FROM=no-reply@yourdomain.com
 
 # Inbound email secret for webhook
 EMAIL_INBOUND_SECRET=devsecret123
+```
 
+### **frontend/.env.example**
 
-frontend/.env.example
-
+```env
 VITE_API_BASE_URL=http://localhost:4000
+```
 
-1.c Install Steps
-Backend
+---
+
+## **1.c Install Steps**
+
+### Backend
+
+```bash
 cd backend
 npm install
+```
 
-Frontend
+### Frontend
+
+```bash
 cd ../frontend
 npm install
+```
 
-1.d Setting Up the Database
+---
+
+## **1.d Setting Up the Database**
 
 Ensure PostgreSQL is running.
 
-Create the database:
+### Create the database:
 
+```sql
 CREATE DATABASE ai_rfp_db;
+```
 
+### Apply schema:
 
-Apply schema:
-
+```bash
 cd sql
 psql -U postgres -d ai_rfp_db -f schema.sql
+```
 
-1.e Configure Email Sending + Receiving
-Outbound Emails (SendGrid)
+---
 
-Verify a sender domain
+## **1.e Configure Email Sending & Receiving**
 
-Create a SendGrid API key
+### Outbound Emails (SendGrid)
 
-Put it in backend .env
+1. Verify a sender domain  
+2. Create a SendGrid API key  
+3. Add the key to `backend/.env`
 
-Inbound Emails (Webhook)
+### Inbound Emails (Webhook)
 
 SendGrid → Inbound Parse → URL:
 
+```
 POST https://your-server.com/api/emails/webhook
-
+```
 
 For local testing:
 
-Use:
-
+```
 http://localhost:4000/api/emails/webhook
+```
 
+Add required header:
 
-Add security header:
-
+```
 X-INBOUND-SECRET: devsecret123
+```
 
-1.f Running the Project Locally
-Start Backend
+---
+
+## **1.f Running the Project Locally**
+
+### Start Backend
+
+```bash
 cd backend
 npm start
+```
 
-Start Frontend
+### Start Frontend
+
+```bash
 cd frontend
 npm run dev
-
+```
 
 Frontend will open at:
 
 👉 http://localhost:5173
 
-1.g Seed Data (Optional)
+---
 
-To insert sample vendors:
+## **1.g Seed Data (Optional)**
 
+Insert sample vendors:
+
+```sql
 INSERT INTO vendors (name, contact, email)
 VALUES ('Acme Supplies', 'John Doe', 'sales@acme.com');
+```
 
-📌 2. Tech Stack
-Frontend
+---
 
-React + Vite
+# 📌 2. Tech Stack
 
-Axios
+### **Frontend**
+- React + Vite  
+- Axios  
+- Tailwind (optional)
 
-Tailwind (optional)
+### **Backend**
+- Node.js + Express  
+- PostgreSQL (`pg`)  
+- SendGrid Email API  
+- OpenAI GPT API  
 
-Backend
+### **Database**
+- PostgreSQL  
+- Tables:
+  - `rfps`
+  - `vendors`
+  - `proposals`
+  - `proposal_scores`
 
-Node.js + Express
+### **AI Provider**
+- OpenAI (GPT-4.1-mini)
+  - RFP extraction  
+  - Vendor email parsing  
+  - Proposal scoring  
 
-PostgreSQL (pg library)
+### **Email**
+- SendGrid  
+  - Outbound RFP sending  
+  - Inbound vendor reply webhook  
 
-Nodemailer / SendGrid SDK
+---
 
-OpenAI API (for NLP + scoring)
+# 📌 3. API Documentation
 
-Database
-
-PostgreSQL
-
-Schema includes:
-
-rfps
-
-vendors
-
-proposals
-
-proposal_scores
-
-AI Provider
-
-OpenAI (GPT-4.1-mini)
-
-RFP extraction
-
-Vendor response parsing
-
-Proposal scoring
-
-Email
-
-SendGrid:
-
-Outbound: send RFP to vendors
-
-Inbound: vendor replies trigger webhook
-
-📌 3. API Documentation
-3.a Main Endpoints
-POST /api/rfps/from-text
-
+## **POST /api/rfps/from-text**
 Create an RFP from natural language.
 
-Request
+### Request:
+
+```json
 {
   "text": "I need 20 laptops and 15 monitors, budget 50k, delivery 30 days."
 }
+```
 
-Success Response
+### Response:
+
+```json
 {
   "id": "uuid",
   "title": "Procurement Request",
@@ -191,135 +225,134 @@ Success Response
   "budget": 50000,
   "delivery_days": 30
 }
+```
 
-POST /api/vendors
+---
 
-Create vendor.
+## **POST /api/vendors**
+Create a vendor.
 
-Request:
+### Request:
+
+```json
 {
   "name": "Acme Supplies",
   "contact": "John",
   "email": "sales@acme.com"
 }
+```
 
-Success:
+### Response:
+
+```json
 {
   "id": "uuid",
   "name": "Acme Supplies",
   "email": "sales@acme.com"
 }
+```
 
-POST /api/rfps/:id/send
+---
 
-Send RFP email to all vendors.
+## **POST /api/rfps/:id/send**
+Send an RFP email to all vendors.
 
-POST /api/emails/webhook
+---
 
-Inbound vendor reply.
+## **POST /api/emails/webhook**
+Handles inbound vendor email replies.
 
-Headers:
+### Headers:
 
+```
 X-INBOUND-SECRET: devsecret123
+```
 
+### Request Body:
 
-Body:
-
+```json
 {
   "from": "sales@acme.com",
   "subject": "Re: RFP-123 TOKEN:ABC123",
   "text": "We offer laptops at $950 each…"
 }
+```
 
+### Response:
 
-Success Response:
-
+```json
 { "status": "parsed", "vendor": "sales@acme.com" }
+```
 
-GET /api/rfps/:id/proposals
+---
 
-Fetch proposals + scores.
+## **GET /api/rfps/:id/proposals**
+Fetch proposals + AI-generated scores.
 
-📌 4. Decisions & Assumptions
-4.a Key Design Decisions
+---
 
-Structured RFP format created from natural text using GPT.
+# 📌 4. Decisions & Assumptions
 
-Vendor response parser extracts:
+## **4.a Key Design Decisions**
+- GPT used to structure RFPs from natural text  
+- Vendor replies parsed using AI for:
+  - Pricing  
+  - Delivery days  
+  - Warranty  
+  - Payment terms  
+- Custom scoring model:
+  - 50% price  
+  - 30% delivery  
+  - 20% warranty  
+- SendGrid inbound webhook used for real-time ingestion  
+- Unique tokens in subject:
+  ```
+  RFP-<ID> TOKEN:<SECRET>
+  ```
 
-price
+---
 
-delivery days
+## **4.b Assumptions**
+- Vendors reply in natural language  
+- USD assumed  
+- Subject always contains RFP ID  
+- Delivery interpreted in days  
+- No authentication (assignment scope)  
+- Temperature = 0 for deterministic parsing  
 
-warranty
+---
 
-terms
+# 📌 5. AI Tools Usage
 
-AI-based scoring considers:
+## **5.a Tools Used**
+- ChatGPT (GPT-4.1)  
+- GitHub Copilot  
+- Cursor IDE (optional)
 
-price weight (50%)
+---
 
-delivery (30%)
+## **5.b How AI Helped**
+- Generated boilerplate backend & frontend structure  
+- Provided schema and architectural suggestions  
+- Debugged Postgres and email parsing issues  
+- Wrote prompts for accurate extraction  
 
-warranty (20%)
+---
 
-SendGrid inbound webhook chosen for simplicity & reliability.
+## **5.c Notable Prompts**
+- “Parse this vendor email into structured JSON…”  
+- “Convert this natural language RFP into items…”  
+- “Fix Postgres query…”  
 
-UUID-based RFP tokens in email subjects:
+---
 
-RFP-<ID> TOKEN:<SECRET>
+## **5.d Learnings**
+- JSON-only prompts improve accuracy  
+- Deterministic temperature gives predictable output  
+- AI drastically improves development speed  
+- Prompt engineering is key for parsing  
 
-4.b Assumptions
+---
 
-Vendors reply in natural language, not structured JSON.
 
-Currency assumed USD unless specified.
 
-Email subject contains RFP ID (as in assignment).
-
-Delivery dates expressed in days, not actual calendar dates.
-
-No need for authentication (assignment scope).
-
-AI model is deterministic (temperature = 0).
-
-📌 5. AI Tools Usage
-5.a Tools Used
-
-ChatGPT / GPT-4.1
-
-GitHub Copilot
-
-Cursor IDE (optional)
-
-5.b How AI Helped
-
-Generated boilerplate React and Node structure.
-
-Guided DB schema creation.
-
-Helped design RFP extraction prompt.
-
-Debugged vendor parsing logic.
-
-Suggested scoring formula.
-
-5.c Notable Prompts
-
-“Parse this vendor email into structured JSON…”
-
-“Convert natural language into an RFP schema…”
-
-“Generate Express controllers + routes…”
-
-“Fix Postgres query returning null values…”
-
-5.d Learnings from AI Use
-
-Prompt engineering significantly improves extraction accuracy.
-
-Using deterministic temperature (0) is essential for predictable parsing.
-
-Ensuring JSON-only responses simplifies backend logic.
-
-AI can quickly generate consistent validation schemas.
